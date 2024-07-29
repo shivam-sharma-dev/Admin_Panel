@@ -8,3 +8,5 @@ Hover over a message to pin it
 https://dummyjson.com/docs/auth
 
 https://themesflat.co/html/remos/home-2.html
+
+https://flexopack.netlify.app/Navlogo.jpg
