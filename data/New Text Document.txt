@@ -1,0 +1,10 @@
+/login- page input fields email password
+/signup - page input fields firstName,lastName, email, password
+/dashboard - tables products, blogs
+/products - table - button create, update, delete
+/blogs - table - button create, update, delete
+Hover over a message to pin it
+
+https://dummyjson.com/docs/auth
+
+https://themesflat.co/html/remos/home-2.html
