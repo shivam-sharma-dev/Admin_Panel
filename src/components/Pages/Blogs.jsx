@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState,useEffect } from "react";
 import {
   MdOutlineArrowDownward,
   MdOutlineArticle,
@@ -9,34 +9,13 @@ import {
   MdOutlineSearch,
   MdOutlineStore,
 } from "react-icons/md";
-import { Link } from "react-router-dom";
 
-function Dashboard() {
+function Blogs() {
   const [activeItem, setActiveItem] = useState("Dashboard");
-  const [products, setProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
 
-  // Fetch products data
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("https://flex-o-pack-api.onrender.com/api/v1/product/get-products");
-        const data = await response.json();
-        if (data.status === "success") {
-          setProducts(data.data);
-        } else {
-          console.error("Failed to fetch products:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // Fetch blogs data
-  useEffect(() => {
+   // Fetch blogs data
+   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const response = await fetch("https://flex-o-pack-api.onrender.com/api/v1/blog/get-blogs");
@@ -54,15 +33,16 @@ function Dashboard() {
     fetchBlogs();
   }, []);
 
-  // Handle menu item click
+
+  // Function to update the active menu item
   const handleMenuItemClick = (item) => {
     setActiveItem(item);
   };
 
   const menuItems = [
-    { name: "Dashboard", icon: <MdOutlineDashboard />, to: "/" },
-    { name: "Products", icon: <MdOutlineStore />, to: "/products" },
-    { name: "Blogs", icon: <MdOutlineArticle />, to: "/blogs" },
+    { name: "Dashboard", icon: <MdOutlineDashboard />, href: "/" },
+    { name: "Products", icon: <MdOutlineStore />, href: "/products" },
+    { name: "Blogs", icon: <MdOutlineArticle />, href: "/blogs" },
   ];
 
   const headerIcons = [
@@ -77,7 +57,7 @@ function Dashboard() {
       <aside className="fixed w-[280px] min-w-[280px] h-full left-0 z-20 shadow-custom pt-[81px] flex items-center justify-start flex-col bg-[#fff]">
         {/* Logo */}
         <div className="fixed top-0 left-0 pt-[14px] pb-[13px] w-[280px] border-b border-[#f2f7fb] flex items-center justify-center z-[5]">
-          <Link to="/" className="relative no-underline">
+          <a href="/" className="relative no-underline">
             <img
               className="h-auto max-h-full align-middle border-0"
               height={"55px"}
@@ -85,7 +65,7 @@ function Dashboard() {
               src="https://flexopack.netlify.app/Navlogo.jpg"
               alt="Logo"
             />
-          </Link>
+          </a>
         </div>
 
         {/* Navigation */}
@@ -98,8 +78,8 @@ function Dashboard() {
               </div>
               <ul className="flex flex-col justify-center">
                 <li className="relative list-none p-0">
-                  <Link
-                    to={menuItems[0].to}
+                  <a
+                    href={menuItems[0].href}
                     onClick={() => handleMenuItemClick(menuItems[0].name)}
                     className={`p-[14px] relative flex items-center justify-start gap-[10px] no-underline ${
                       activeItem === menuItems[0].name
@@ -113,7 +93,7 @@ function Dashboard() {
                     >
                       {menuItems[0].name}
                     </div>
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -126,8 +106,8 @@ function Dashboard() {
               <ul className="flex flex-col">
                 {menuItems.slice(1).map((item) => (
                   <li key={item.name} className="relative list-none p-0">
-                    <Link
-                      to={item.to}
+                    <a
+                      href={item.href}
                       onClick={() => handleMenuItemClick(item.name)}
                       className={`p-[14px] relative flex items-center justify-start gap-[10px] no-underline ${
                         activeItem === item.name
@@ -141,7 +121,7 @@ function Dashboard() {
                       >
                         {item.name}
                       </div>
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -199,91 +179,8 @@ function Dashboard() {
 
         {/* Main Content */}
         <main className="main-content flex flex-col pt-20 bg-[#F2F7FB] transition-all duration-300 ease-linear">
-          <div className="main-content-inner p-[30px] flex-grow">
-            <div className="main-content-wrapper w-full m-auto">
-              {/* Products Section */}
-              <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
-                <div className="flex items-center justify-between">
-                  <h5 className="text-2xl text-[#111] font-bold">Products</h5>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      className="flex items-center text-[#95989D] text-[15px] font-normal"
-                      aria-label="View All"
-                    >
-                      View All
-                      <MdOutlineArrowDownward />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <div className="flex flex-col">
-                    <ul className="flex w-full text-left p-0 list-none border-b border-[#E5E8EC] mb-5 justify-between">
-                      <li className="p-0 list-none">
-                        <div className="text-[#111] text-lg font-bold">Name</div>
-                      </li>
-
-                      <li className="p-0 list-none">
-                        <div className="text-[#111] text-lg font-bold">Model No.</div>
-                      </li>
-
-                      <li className="p-0 list-none">
-                        <div className="text-[#111] text-lg font-bold">Price</div>
-                      </li>
-
-                      <li className="p-0 list-none">
-                        <div className="text-[#111] text-lg font-bold">
-                          Category
-                        </div>
-                      </li>
-
-                      <li className="w-[126px] p-0 list-none">
-                        <div className="text-[#111] text-lg font-bold">Specification</div>
-                      </li>
-                    </ul>
-
-                    <div>
-                      <ul className="flex flex-col gap-[20px]">
-                        {products.map((product) => (
-                          <li
-                            key={product._id}
-                            className="flex justify-between gap-5 p-4 border-b border-[#E5E8EC]"
-                          >
-                            <div className="flex items-center gap-3">
-                              <img
-                                className="h-16 w-16 object-cover rounded-lg"
-                                src={product.image}
-                                alt={product.name}
-                              />
-                              <div className="text-[#111] text-lg font-bold">
-                                {product.itemName}
-                              </div>
-                            </div>
-                            <div className="text-[#111] text-lg">{product.modelNo}</div>
-                            <div className="text-[#111] text-lg">{product.price}</div>
-                            <div className="text-[#111] text-lg">{product.category}</div>
-                            <div
-                              className={`text-lg ${
-                                product.status === "Available"
-                                  ? "text-green-500"
-                                  : "text-red-500"
-                              }`}
-                            >
-                              {product.specifications.fillingSystem }
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                
-              </div>
-
-              {/* Blogs Section */}
-              <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
+        <div class="main-content-inner p-[30px] flex-grow">
+        <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
                 <div className="flex items-center justify-between">
                   <h5 className="text-2xl text-[#111] font-bold">Blogs</h5>
                   <div className="relative">
@@ -347,12 +244,11 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+              </div>
         </main>
       </div>
     </div>
   );
 }
 
-export default Dashboard;
+export default Blogs;
