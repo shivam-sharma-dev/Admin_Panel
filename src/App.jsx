@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0);
+const title = 'React';
 
+function App() {
   return (
     <>
       <p className='read-the-docs'>Flexo</p>
