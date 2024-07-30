@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import './App.css';
+import Dashboard from "./components/Dashboard/Dashborad";
 
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
-    <>
-      <p className='read-the-docs'>Flexo</p>
-    </>
+    <div>
+
+      <Dashboard/>
+
+    </div>
   );
 }
 
