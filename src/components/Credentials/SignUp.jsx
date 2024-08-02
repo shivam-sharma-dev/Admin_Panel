@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Updated import for v6
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -9,22 +10,43 @@ const SignUp = () => {
     confirmPassword: '',
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate(); // Use useNavigate instead of useHistory
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Basic validation
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+    if (!validateEmail(formData.email)) {
+      alert('Please enter a valid email address.');
       return;
     }
 
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      alert('Password must be at least 8 characters long.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await fetch('http://flex-o-pack-api.onrender.com/api/v1/user/sign-up', {
+      const response = await fetch('https://flex-o-pack-api.onrender.com/api/v1/user/sign-up', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,15 +59,19 @@ const SignUp = () => {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert('Sign up successful');
+        alert('Sign up successful!');
+        navigate('/login'); // Use navigate to redirect after success
       } else {
-        const errorData = await response.json();
-        alert(`Sign up failed: ${errorData.message || 'Unknown error'}`);
+        alert(`Sign up failed: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred during sign-up');
+      setError('An error occurred during sign-up. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,6 +79,7 @@ const SignUp = () => {
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700">First Name</label>
@@ -112,8 +139,9 @@ const SignUp = () => {
           <button
             type="submit"
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
       </div>

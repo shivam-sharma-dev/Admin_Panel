@@ -10,11 +10,15 @@ import {
   MdOutlineStore,
 } from "react-icons/md";
 import { Link } from "react-router-dom";
+import Modal from "./Modal"; // Ensure this import is correct
 
 function Dashboard() {
   const [activeItem, setActiveItem] = useState("Dashboard");
   const [products, setProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
 
   // Fetch products data
   useEffect(() => {
@@ -57,6 +61,19 @@ function Dashboard() {
   // Handle menu item click
   const handleMenuItemClick = (item) => {
     setActiveItem(item);
+  };
+
+  // Open modal
+  const openModal = (item, type) => {
+    setSelectedItem(item);
+    setModalType(type);
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
   };
 
   const menuItems = [
@@ -248,7 +265,8 @@ function Dashboard() {
                         {products.map((product) => (
                           <li
                             key={product._id}
-                            className="flex justify-between gap-5 p-4 border-b border-[#E5E8EC]"
+                            className="flex justify-between gap-5 p-4 border-b border-[#E5E8EC] cursor-pointer"
+                            onClick={() => openModal(product, "product")}
                           >
                             <div className="flex items-center gap-3">
                               <img
@@ -278,8 +296,6 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
-
-                
               </div>
 
               {/* Blogs Section */}
@@ -323,7 +339,8 @@ function Dashboard() {
                         {blogs.map((blog) => (
                           <li
                             key={blog._id}
-                            className="flex items-center p-2 border-b border-[#E5E8EC] justify-between"
+                            className="flex items-center p-2 border-b border-[#E5E8EC] justify-between cursor-pointer"
+                            onClick={() => openModal(blog, "blog")}
                           >
                             <div className="flex items-center gap-3 w-[250px] p-2">
                               <img
@@ -351,6 +368,14 @@ function Dashboard() {
           </div>
         </main>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        item={selectedItem}
+        type={modalType}
+      />
     </div>
   );
 }
