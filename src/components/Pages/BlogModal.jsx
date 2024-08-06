@@ -1,64 +1,23 @@
-import ReactModal from 'react-modal';
+// Modal.js
+import React from 'react';
 
-const BlogModal = ({ isOpen, onClose, form, handleInputChange, handleFormSubmit, isEditing }) => (
-  <ReactModal
-    isOpen={isOpen}
-    onRequestClose={onClose}
-    contentLabel="Blog Form"
-    ariaHideApp={false} // Only for development, make sure to set your app element in production
-    className="modal"
-    overlayClassName="modal-overlay"
-  >
-    <form onSubmit={handleFormSubmit} className="p-6">
-      <h3 className="text-xl font-bold mb-4">{isEditing ? 'Edit Blog' : 'Create Blog'}</h3>
-      <input
-        type="text"
-        name="title"
-        placeholder="Title"
-        value={form.title}
-        onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
-        required
-      />
-      <input
-        type="text"
-        name="author"
-        placeholder="Author"
-        value={form.author}
-        onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
-        required
-      />
-      <input
-        type="text"
-        name="tags"
-        placeholder="Tags (comma separated)"
-        value={form.tags}
-        onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
-        required
-      />
-      <input
-        type="text"
-        name="cover"
-        placeholder="Cover Image URL"
-        value={form.cover}
-        onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
-        required
-      />
-      <div className="flex justify-end gap-2">
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black opacity-50" onClick={onClose}></div>
+      <div className="relative bg-white rounded-lg shadow-lg p-6 z-10">
         <button
-          type="button"
+          className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
           onClick={onClose}
-          className="bg-gray-300 text-black p-2 rounded"
         >
-          Cancel
+          &times;
         </button>
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-          {isEditing ? 'Update Blog' : 'Create Blog'}
-        </button>
+        {children}
       </div>
-    </form>
-  </ReactModal>
-);
+    </div>
+  );
+};
+
+export default Modal;

@@ -1,10 +1,10 @@
-// Blogs.js
 import React, { useState, useEffect } from 'react';
 import Layout from '../../Layout/Layout';
+import Modal from './BlogModal';  // Import your modal component
 
 const Blogs = () => {
-
   const [blogs, setBlogs] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentBlog, setCurrentBlog] = useState(null);
   const [form, setForm] = useState({ title: '', author: '', tags: '', cover: '' });
@@ -66,6 +66,7 @@ const Blogs = () => {
         );
         setIsEditing(false);
         setCurrentBlog(null);
+        setIsModalOpen(false);
       } else {
         console.error("Failed to update blog:", data.message);
       }
@@ -119,7 +120,7 @@ const Blogs = () => {
         placeholder="Title"
         value={form.title}
         onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
+        className="p-2 border border-gray-300 rounded-md w-full"
         required
       />
       <input
@@ -128,7 +129,7 @@ const Blogs = () => {
         placeholder="Author"
         value={form.author}
         onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
+        className="p-2 border border-gray-300 rounded-md w-full"
         required
       />
       <input
@@ -137,7 +138,7 @@ const Blogs = () => {
         placeholder="Tags (comma separated)"
         value={form.tags}
         onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
+        className="p-2 border border-gray-300 rounded-md w-full"
         required
       />
       <input
@@ -146,113 +147,104 @@ const Blogs = () => {
         placeholder="Cover Image URL"
         value={form.cover}
         onChange={handleInputChange}
-        className="mb-2 p-2 border rounded w-full"
+        className="p-2 border border-gray-300 rounded-md w-full"
         required
       />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+      <button type="submit" className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]">
         {isEditing ? "Update Blog" : "Create Blog"}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setIsEditing(false);
+          setIsModalOpen(false);
+        }}
+        className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-600 ml-2"
+      >
+        Cancel
       </button>
     </form>
   );
 
-
   return (
     <Layout>
-      <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
-        <div className="flex items-center justify-between">
-          <h5 className="text-2xl text-[#111] font-bold">Blogs</h5>
-          <button
-            onClick={() => setIsEditing(true)}
-            type="button"
-            className="bg-blue-500 text-white p-2 rounded"
-          >
-            Create Blog
-          </button>
-        </div>
+      <div className="main-content-wrapper w-full m-auto">
+        <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
+          <div className="flex items-center justify-between">
+            <h5 className="text-2xl text-[#111] font-bold">Blogs</h5>
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setIsModalOpen(true);
+              }}
+              type="button"
+              className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]"
+            >
+              Create Blog
+            </button>
+          </div>
 
-        {/* Blog Form */}
-        {isEditing && <BlogForm />}
-
-        {/* Blog List */}
-        <div className="overflow-x-auto">
-          <div className="flex flex-col">
-            <ul className="flex justify-between">
-              <li className="p-0 list-none w-[250px]">
-                <div className="text-[#111] text-lg font-bold">Title</div>
-              </li>
-
-              <li className="p-0 list-none w-[200px]">
-                <div className="text-[#111] text-lg font-bold">Author</div>
-              </li>
-
-              <li className="p-0 list-none w-[200px]">
-                <div className="text-[#111] text-lg font-bold">Created At</div>
-              </li>
-
-              <li className="p-0 list-none w-[300px]">
-                <div className="text-[#111] text-lg font-bold">Tags</div>
-              </li>
-
-              <li className="p-0 list-none w-[150px]">
-                <div className="text-[#111] text-lg font-bold">Actions</div>
-              </li>
-            </ul>
-
-            <div>
-              <ul className="flex flex-col gap-[20px]">
+          {/* Blog List */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border-b p-4 text-left">Cover</th>
+                  <th className="border-b p-4 text-left">Title</th>
+                  <th className="border-b p-4 text-left">Author</th>
+                  <th className="border-b p-4 text-left">Created At</th>
+                  <th className="border-b p-4 text-left">Tags</th>
+                  <th className="border-b p-4 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {blogs.map((blog) => (
-                  <li
-                    key={blog._id}
-                    className="flex items-center p-2 border-b border-[#E5E8EC] justify-between"
-                  >
-                    <div className="flex items-center gap-3 w-[250px] p-2">
+                  <tr key={blog._id}>
+                    <td className="border-b p-4">
                       <img
-                        className="h-16 w-16 object-cover rounded-lg"
                         src={blog.cover}
                         alt={blog.title}
+                        className="h-16 w-16 object-cover rounded-md"
                       />
-                      <div className="text-[#111] text-lg font-bold">
-                        {blog.title}
-                      </div>
-                    </div>
-                    <div className="text-[#111] text-lg w-[200px] p-2">{`${blog.author.firstName} ${blog.author.lastName}`}</div>
-                    <div className="text-[#111] text-lg w-[200px] p-2">{new Date(blog.createdAt).toLocaleDateString()}</div>
-                    <div className="text-[#111] text-lg w-[350px] p-2">
-                      {blog.tags.join(', ')}
-                    </div>
-                    <div className="text-[#111] text-lg w-[150px] p-2 flex gap-2">
+                    </td>
+                    <td className="border-b p-4">{blog.title}</td>
+                    <td className="border-b p-4">{`${blog.author.firstName} ${blog.author.lastName}`}</td>
+                    <td className="border-b p-4">{new Date(blog.createdAt).toLocaleDateString()}</td>
+                    <td className="border-b p-4">{blog.tags.join(', ')}</td>
+                    <td className="border-b p-4 space-x-2">
                       <button
                         onClick={() => {
                           setIsEditing(true);
                           setCurrentBlog(blog);
-                          setForm({
-                            title: blog.title,
-                            author: blog.author,
-                            tags: blog.tags.join(', '),
-                            cover: blog.cover,
-                          });
+                          setForm({ title: blog.title, author: blog.author, tags: blog.tags.join(', '), cover: blog.cover });
+                          setIsModalOpen(true);
                         }}
-                        className="text-blue-500 hover:text-blue-700"
+                        className="bg-[#0d6efd] text-white py-1 px-2 rounded-md hover:bg-[#0056b3]"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteBlog(blog._id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-800"
                       >
                         Delete
                       </button>
-                    </div>
-                  </li>
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
+      {/* Modal for Create/Edit Blog */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <BlogForm />
+      </Modal>
     </Layout>
   );
 };
 
 export default Blogs;
+
