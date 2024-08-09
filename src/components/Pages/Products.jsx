@@ -1,407 +1,382 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../Layout/Layout';
-import { MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
-import Modal from 'react-modal';
-
-Modal.setAppElement('#root'); // For accessibility
+import Modal from './ProductModal';  // Import your modal component
 
 const Products = () => {
   const [products, setProducts] = useState([]);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editProductId, setEditProductId] = useState(null);
-  const [newProduct, setNewProduct] = useState({
-    itemName: "",
-    modelNo: "",
-    price: "",
-    category: "",
-    weight: "",
-    image: "",
-  });
-  const [editProduct, setEditProduct] = useState({
-    itemName: "",
-    modelNo: "",
-    price: "",
-    category: "",
-    weight: "",
-    image: "",
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [form, setForm] = useState({
+    itemName: '',
+    subCategory: '',
+    modelNo: '',
+    coverImage: '',
+    image: '',
+    images: [],
+    price: '',
+    specifications: {
+      products: [],
+      noOfTracks: '',
+      weighHeadNos: [],
+      feedingStyle: '',
+      fillingSystem: [],
+      fillingAccuracy: '',
+      sealType: [],
+      fillingRange: '',
+      packingMaterial: [],
+      laminateSpecs: [],
+      lengthOfPouch: '',
+      pouchDimensions: [],
+      powerConsumption: [],
+      compressedAirRequired: '',
+      touchScreen: '',
+      productionOutput: '',
+      weight: '',
+      materialOfChasis: '',
+      hopper: [],
+      conveyor: '',
+      thicknessOfBucket: '',
+      machineSize: [],
+      productId: ''
+    },
   });
 
+  // Fetch products data
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(import.meta.env.VITE_API_PRODUCTS_URL);
+        const data = await response.json();
+        if (data.status === "success") {
+          setProducts(data.data);
+        } else {
+          console.error("Failed to fetch products:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(
-        "https://flex-o-pack-api.onrender.com/api/v1/product/get-products"
-      );
-      const data = await response.json();
-      if (data.status === "success") {
-        setProducts(data.data);
-      } else {
-        console.error("Failed to fetch products:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
-  
-
-  const handleInputChange = (e) => {
-    setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
-  };
-
-  const handleEditInputChange = (e) => {
-    setEditProduct({ ...editProduct, [e.target.name]: e.target.value });
-  };
-
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
+  // Create Product
+  const createProduct = async (newProduct) => {
     const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(
-        "https://flex-o-pack-api.onrender.com/api/v1/product/create-product",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(newProduct),
-        }
-      );
-      const data = await response.json();
-      if (data.status === "success") {
-        setProducts([...products, data.data]);
-        setNewProduct({
-          itemName: "",
-          modelNo: "",
-          price: "",
-          category: "",
-          weight: "",
-          image: "",
-        });
-        setIsAddModalOpen(false);
-      } else {
-        console.error("Failed to add product:", data.message);
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-    }
-  };
-
-  const handleEditProduct = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    console.log('Editing product with ID:', editProductId); // Debugging line
-    console.log('Edit Product Data:', editProduct); // Debugging line
-    try {
-      const response = await fetch(
-        `https://flex-o-pack-api.onrender.com/api/v1/product/update-product/${editProductId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(editProduct),
-        }
-      );
-      const data = await response.json();
-      if (data.status === "success") {
-        setProducts(
-          products.map((product) =>
-            product._id === editProductId ? data.data : product
-          )
-        );
-        setIsEditModalOpen(false);
-      } else {
-        console.error("Failed to edit product:", data.message);
-      }
-    } catch (error) {
-      console.error("Error editing product:", error);
-    }
-  };
-
-  
-  const handleDeleteProduct = async (productId) => {
-    const token = localStorage.getItem('token');
-    console.log('Attempting to delete product with ID:', productId);
-    console.log('Retrieved token from localStorage:', token);
-  
     if (!token) {
       console.error('No token found');
       return;
     }
-  
+
     try {
-      const url = `https://flex-o-pack-api.onrender.com/api/v1/product/delete-product/${productId}`;
-      console.log('Making DELETE request to URL:', url);
-  
-      const response = await fetch(url, {
-        method: "DELETE",
+      const response = await fetch(import.meta.env.VITE_API_CREATE_PRODUCT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setProducts((prevProducts) => [...prevProducts, data.data]);
+
+        setIsModalOpen(false)
+
+        setForm({
+          itemName: '',
+          subCategory: '',
+          modelNo: '',
+          coverImage: '',
+          image: '',
+          images: [],
+          price: '',
+          specifications: {
+            products: [],
+            noOfTracks: '',
+            weighHeadNos: [],
+            feedingStyle: '',
+            fillingSystem: [],
+            fillingAccuracy: '',
+            sealType: [],
+            fillingRange: '',
+            packingMaterial: [],
+            laminateSpecs: [],
+            lengthOfPouch: '',
+            pouchDimensions: [],
+            powerConsumption: [],
+            compressedAirRequired: '',
+            touchScreen: '',
+            productionOutput: '',
+            weight: '',
+            materialOfChasis: '',
+            hopper: [],
+            conveyor: '',
+            thicknessOfBucket: '',
+            machineSize: [],
+            productId: '',
+          },
+        });
+
+      } else {
+        console.error("Failed to create product:", data.message);
+      }
+    } catch (error) {
+      console.error("Error creating product:", error);
+    }
+  };
+
+  // Update Product
+  const updateProduct = async (updatedProduct) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    const productId = updatedProduct._id; // Use updatedProduct._id instead of currentProduct._id
+    if (!productId) {
+      console.error('Product ID is missing');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_UPDATE_PRODUCT_URL}/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedProduct),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setProducts((prevProducts) =>
+          prevProducts.map((product) => (product._id === data.data._id ? data.data : product))
+        );
+        setIsEditing(false);
+        setCurrentProduct(null);
+        setIsModalOpen(false);
+      } else {
+        console.error("Failed to update product:", data.message);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
+  };
+
+  // Delete Product
+  const deleteProduct = async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_DELETE_PRODUCT_URL}/${id}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
-  
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Array.from(response.headers.entries()));
-  
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Received response data:', data);
-  
-        if (data.status === "success") {
-          // Refresh product list
-          await fetchProducts();
-          console.log("Product deleted successfully");
-        } else {
-          console.error("Failed to delete product:", data.message);
-        }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setProducts((prevProducts) => prevProducts.filter((product) => product._id !== id));
       } else {
-        console.error("Failed to delete product:", response.status);
+        console.error("Failed to delete product:", data.message);
       }
     } catch (error) {
       console.error("Error deleting product:", error);
     }
   };
-  
 
-  const showEditFormWithProduct = (product) => {
-    setEditProduct({
-      itemName: product.itemName,
-      modelNo: product.modelNo,
-      price: product.price,
-      category: product.category,
-      weight: product.specifications.weight,
-      image: product.image,
-    });
-    setEditProductId(product._id);
-    setIsEditModalOpen(true);
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    }));
   };
+
+  // Handle specifications changes
+  const handleSpecsChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      specifications: {
+        ...prevForm.specifications,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      updateProduct({ ...form, _id: currentProduct._id });
+    } else {
+      createProduct(form);
+    }
+  };
+
+  const ProductForm = () => (
+    <form onSubmit={handleFormSubmit} className="bg-[#fff] p-6 shadow-customShadow rounded-2xl">
+      <h3 className="text-xl font-bold mb-4">{isEditing ? "Edit Product" : "Create Product"}</h3>
+      <input
+        type="text"
+        name="itemName"
+        placeholder="Item Name"
+        value={form.itemName}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+        required
+      />
+      <input
+        type="text"
+        name="subCategory"
+        placeholder="Sub Category"
+        value={form.subCategory}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+      />
+      <input
+        type="text"
+        name="modelNo"
+        placeholder="Model No"
+        value={form.modelNo}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+        required
+      />
+      <input
+        type="text"
+        name="coverImage"
+        placeholder="Cover Image URL"
+        value={form.coverImage}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+      />
+      <input
+        type="text"
+        name="image"
+        placeholder="Image URL"
+        value={form.image}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+      />
+      <input
+        type="number"
+        name="price"
+        placeholder="Price"
+        value={form.price}
+        onChange={handleInputChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+        required
+      />
+      <textarea
+        name="specifications"
+        placeholder="Specifications"
+        value={JSON.stringify(form.specifications, null, 2)}
+        onChange={handleSpecsChange}
+        className="p-2 border border-gray-300 rounded-md w-full"
+      />
+      <button type="submit" className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]">
+        {isEditing ? "Update Product" : "Create Product"}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setIsEditing(false);
+          setIsModalOpen(false);
+        }}
+        className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-600 ml-2"
+      >
+        Cancel
+      </button>
+    </form>
+  );
 
   return (
     <Layout>
       <div className="main-content-wrapper w-full m-auto">
         <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
-          <div className="flex flex-col justify-center">
-            <h5 className="text-2xl text-[#111] font-bold my-4">Products</h5>
-            <div className="relative">
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]"
-              >
-                Add Product
-              </button>
+          <div className="flex items-center justify-between">
+            <h5 className="text-2xl text-[#111] font-bold">Products</h5>
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setIsModalOpen(true);
+              }}
+              type="button"
+              className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]"
+            >
+              Create Product
+            </button>
+          </div>
 
-              {/* Add Product Modal */}
-              <Modal
-                isOpen={isAddModalOpen}
-                onRequestClose={() => setIsAddModalOpen(false)}
-                contentLabel="Add Product"
-                className="modal"
-                overlayClassName="overlay"
-              >
-                <h2 className="text-xl font-bold mb-4">Add Product</h2>
-                <form onSubmit={handleAddProduct} className="space-y-4">
-                  <input
-                    type="text"
-                    name="itemName"
-                    value={newProduct.itemName || ""}
-                    onChange={handleInputChange}
-                    placeholder="Item Name"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="modelNo"
-                    value={newProduct.modelNo || ""}
-                    onChange={handleInputChange}
-                    placeholder="Model Number"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <input
-                    type="number"
-                    name="price"
-                    value={newProduct.price || ""}
-                    onChange={handleInputChange}
-                    placeholder="Price"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="category"
-                    value={newProduct.category || ""}
-                    onChange={handleInputChange}
-                    placeholder="Category"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="weight"
-                    value={newProduct.weight || ""}
-                    onChange={handleInputChange}
-                    placeholder="Weight"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="image"
-                    value={newProduct.image || ""}
-                    onChange={handleInputChange}
-                    placeholder="Image URL"
-                    className="p-2 border border-gray-300 rounded-md w-full"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]"
-                  >
-                    Add Product
-                  </button>
-                  <button
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-600 ml-2"
-                  >
-                    Cancel
-                  </button>
-                </form>
-              </Modal>
-
-              {/* Products Table */}
-              <div className="overflow-x-auto mt-8">
-                <table className="min-w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border-b p-4 text-left">Image</th>
-                      <th className="border-b p-4 text-left">Item Name</th>
-                      <th className="border-b p-4 text-left">Model Number</th>
-                      <th className="border-b p-4 text-left">Price</th>
-                      <th className="border-b p-4 text-left">Category</th>
-                      <th className="border-b p-4 text-left">Weight</th>
-                      <th className="border-b p-4 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product._id}>
-                        <td className="border-b p-4">
-                          <img src={product.image} alt={product.itemName} className="w-16 h-16 object-cover" />
-                        </td>
-                        <td className="border-b p-4">{product.itemName}</td>
-                        <td className="border-b p-4">{product.modelNo}</td>
-                        <td className="border-b p-4">${product.price}</td>
-                        <td className="border-b p-4">{product.category}</td>
-                        <td className="border-b p-4">{product.specifications.weight}</td>
-                        <td className="border-b p-4">
-                          <button
-                            onClick={() => showEditFormWithProduct(product)}
-                            className="text-blue-500 hover:underline mr-4"
-                          >
-                            <MdOutlineEdit size={20} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product._id)}
-                            className="text-red-500 hover:underline"
-                          >
-                            <MdOutlineDelete size={20} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          {/* Product List */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border-b p-4 text-left">Cover</th>
+                  <th className="border-b p-4 text-left">Item Name</th>
+                  <th className="border-b p-4 text-left">Model No</th>
+                  <th className="border-b p-4 text-left">Price</th>
+                  <th className="border-b p-4 text-left">Created At</th>
+                  <th className="border-b p-4 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product._id}>
+                    <td className="border-b p-4">
+                      <img
+                        src={product.coverImage}
+                        alt={product.itemName}
+                        className="h-16 w-16 object-cover rounded-md"
+                      />
+                    </td>
+                    <td className="border-b p-4">{product.itemName}</td>
+                    <td className="border-b p-4">{product.modelNo}</td>
+                    <td className="border-b p-4">{product.price}</td>
+                    <td className="border-b p-4">{new Date(product.createdAt).toLocaleDateString()}</td>
+                    <td className="border-b p-4 space-x-2 flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          setIsEditing(true);
+                          setCurrentProduct(product);
+                          setForm({ ...product });
+                          setIsModalOpen(true);
+                        }}
+                        className="bg-blue-600 text-white py-1 px-2 rounded-md hover:bg-blue-800 md:h-8 md:w-20 mx-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(product._id)}
+                        className="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-800 md:h-8 md:w-20"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* Edit Product Modal */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={() => setIsEditModalOpen(false)}
-        contentLabel="Edit Product"
-        className="modal"
-        overlayClassName="overlay"
-      >
-        <h2 className="text-xl font-bold mb-4">Edit Product</h2>
-        <form onSubmit={handleEditProduct} className="space-y-4">
-          <input
-            type="text"
-            name="itemName"
-            value={editProduct.itemName || ""}
-            onChange={handleEditInputChange}
-            placeholder="Item Name"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <input
-            type="text"
-            name="modelNo"
-            value={editProduct.modelNo || ""}
-            onChange={handleEditInputChange}
-            placeholder="Model Number"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <input
-            type="number"
-            name="price"
-            value={editProduct.price || ""}
-            onChange={handleEditInputChange}
-            placeholder="Price"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <input
-            type="text"
-            name="category"
-            value={editProduct.category || ""}
-            onChange={handleEditInputChange}
-            placeholder="Category"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <input
-            type="text"
-            name="weight"
-            value={editProduct.weight || ""}
-            onChange={handleEditInputChange}
-            placeholder="Weight"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <input
-            type="text"
-            name="image"
-            value={editProduct.image || ""}
-            onChange={handleEditInputChange}
-            placeholder="Image URL"
-            className="p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-[#0d6efd] text-white py-2 px-4 rounded-md hover:bg-[#0056b3]"
-          >
-            Save Changes
-          </button>
-          <button
-            onClick={() => setIsEditModalOpen(false)}
-            className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-600 ml-2"
-          >
-            Cancel
-          </button>
-        </form>
+      {/* Modal for Create/Edit Product */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ProductForm />
       </Modal>
     </Layout>
   );

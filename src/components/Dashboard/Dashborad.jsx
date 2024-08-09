@@ -6,6 +6,7 @@ import {
   MdOutlineArrowUpward,
   MdOutlineArrowDownward
 } from "react-icons/md";
+import Charts from '../Charts/Charts';
 
 const Dashboard = () => {
 
@@ -27,7 +28,7 @@ const Dashboard = () => {
       const startTime = new Date();
 
       try {
-        const response = await fetch("https://flex-o-pack-api.onrender.com/api/v1/product/get-products");
+        const response = await fetch(import.meta.env.VITE_API_PRODUCTS_URL);
         const data = await response.json();
         if (data.status === "success") {
           setProducts(data.data);
@@ -50,7 +51,7 @@ const Dashboard = () => {
     const fetchBlogs = async () => {
       const startTime = new Date();
       try {
-        const response = await fetch("https://flex-o-pack-api.onrender.com/api/v1/blog/get-blogs");
+        const response = await fetch(import.meta.env.VITE_API_BLOGS_URL);;
         const data = await response.json();
         if (data.status === "success") {
           setBlogs(data.data.blogs);
@@ -92,12 +93,24 @@ const Dashboard = () => {
 
   const handleProductsViewAll = () => {
     setIsProductsViewAllOpen(!isProductsViewAllOpen);
-  };
+  };  
 
   return (
     <Layout>
 
       <div className="main-content-wrapper w-full m-auto">
+
+        {/* Charts Section */}
+        <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
+          <div className="flex items-center justify-between">
+            <h5 className="text-2xl text-[#111] font-bold">Charts</h5>
+          </div>
+          <div className="overflow-x-auto mt-8">
+                <Charts/>
+          </div>
+        </div>
+
+
         {/* Products Section */}
         <div className="flex flex-col mb-8 px-6 py-8 gap-6 bg-[#fff] shadow-customShadow rounded-2xl">
           <div className="flex items-center justify-between">
@@ -214,6 +227,7 @@ const Dashboard = () => {
             </table>
           </div>
         </div>
+
       </div>
 
       <Modal
